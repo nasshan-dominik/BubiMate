@@ -1,0 +1,2522 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#F7F6F2">
+  <link rel="icon" href="./icon.png" type="image/png">
+  <link rel="apple-touch-icon" href="./icon.png">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <title>BubiMate</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-user-select: none; }
+    input, textarea, select { -webkit-user-select: text; }
+
+    :root {
+      --bubi-bg: #F7F6F2;
+      --bubi-surface: #FFFFFF;
+      --bubi-blueprint: #7895A4;
+      --bubi-blueprint-strong: #527789;
+      --bubi-sage: #758A6B;
+      --bubi-border: #E6E8E7;
+      --bubi-text: #283238;
+      --bubi-text-secondary: #56636A;
+      --bubi-mist: #DCE8EE;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bubi-bg: #111516;
+        --bubi-surface: #1A2022;
+        --bubi-border: #2C3437;
+        --bubi-text: #F5F7F8;
+        --bubi-text-secondary: #AEB8BC;
+        --bubi-mist: #2C3E4A;
+      }
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+      background: var(--bubi-bg);
+      color: var(--bubi-text);
+      line-height: 1.4;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .header {
+      background: var(--bubi-surface);
+      border-bottom: 1px solid var(--bubi-border);
+      padding: 16px;
+      flex-shrink: 0;
+    }
+
+    .header-main {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 8px;
+    }
+
+    .header-title {
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+
+    .header-stats {
+      display: flex;
+      gap: 16px;
+    }
+
+    .stat-col {
+      text-align: right;
+    }
+
+    .stat-num {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--bubi-blueprint-strong);
+    }
+
+    .stat-lab {
+      font-size: 10px;
+      color: var(--bubi-text-secondary);
+      margin-top: 2px;
+      font-weight: 500;
+    }
+
+    .header-info {
+      display: flex;
+      gap: 8px;
+    }
+
+    .header-date {
+      font-size: 12px;
+      color: var(--bubi-text-secondary);
+    }
+
+    .header-badge {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--bubi-blueprint-strong);
+      background: var(--bubi-mist);
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+
+    .main {
+      flex: 1;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      padding: 16px;
+    }
+
+    .screen {
+      display: none;
+    }
+
+    .screen.active {
+      display: block;
+    }
+
+    .km-widget {
+      width: 100px;
+      height: 100px;
+      background: var(--bubi-blueprint-strong);
+      color: white;
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      margin-bottom: 16px;
+      user-select: none;
+    }
+
+    .km-widget:active {
+      opacity: 0.7;
+    }
+
+    .km-widget-value {
+      font-size: 32px;
+      font-weight: 700;
+      line-height: 1;
+      word-break: break-word;
+      min-width: 0;
+    }
+
+    .km-widget-label {
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      opacity: 0.9;
+      margin-top: 6px;
+      letter-spacing: 0.5px;
+    }
+
+    .widgets-row {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .recap-widget {
+      width: 100px;
+      height: 100px;
+      background: var(--bubi-blueprint-strong);
+      color: white;
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .recap-widget:active {
+      opacity: 0.7;
+    }
+
+    .recap-widget-value {
+      font-size: 32px;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .recap-widget-label {
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      opacity: 0.9;
+      margin-top: 6px;
+      letter-spacing: 0.5px;
+    }
+
+    .card {
+      background: var(--bubi-surface);
+      border-radius: 12px;
+      border: 1px solid var(--bubi-border);
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+
+    .card-title {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--bubi-blueprint-strong);
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+      margin-bottom: 12px;
+    }
+
+    .client-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--bubi-border);
+      font-size: 14px;
+    }
+
+    .client-row:last-child { border-bottom: none; }
+
+    .client-name { font-weight: 500; flex: 1; }
+
+    .badge {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 4px 8px;
+      border-radius: 4px;
+      background: var(--bubi-mist);
+      color: var(--bubi-blueprint-strong);
+    }
+
+    .badge.done {
+      background: var(--bubi-sage);
+      color: white;
+    }
+
+    .btn-primary {
+      width: 100%;
+      padding: 16px;
+      background: var(--bubi-blueprint);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      min-height: 48px;
+      margin-bottom: 8px;
+    }
+
+    .btn-primary:active { opacity: 0.7; }
+
+    .btn-secondary {
+      background: var(--bubi-sage);
+    }
+
+    .section-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--bubi-blueprint-strong);
+      text-transform: uppercase;
+      margin: 16px 0 8px 0;
+    }
+
+    .field {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid var(--bubi-border);
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 16px;
+      background: var(--bubi-surface);
+      color: var(--bubi-text);
+      margin-bottom: 12px;
+    }
+
+    select {
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%23527789' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      padding-right: 36px;
+    }
+
+    textarea {
+      resize: none;
+      min-height: 80px;
+    }
+
+    .btn-group {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .btn-small {
+      padding: 14px;
+      background: var(--bubi-blueprint);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      min-height: 44px;
+    }
+
+    .btn-small:active { opacity: 0.7; }
+
+    .time-display {
+      font-size: 12px;
+      color: var(--bubi-text-secondary);
+      padding: 8px 0;
+    }
+
+    .note-box {
+      background: var(--bubi-mist);
+      border-left: 3px solid var(--bubi-blueprint-strong);
+      padding: 12px;
+      border-radius: 6px;
+      margin-bottom: 16px;
+      font-size: 13px;
+      line-height: 1.4;
+    }
+
+    .note-label {
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--bubi-blueprint-strong);
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+
+    .history-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--bubi-border);
+      font-size: 14px;
+    }
+
+    .history-item:last-child { border-bottom: none; }
+
+    .action-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--bubi-border);
+      font-size: 14px;
+      gap: 12px;
+    }
+
+    .action-item:last-child { border-bottom: none; }
+
+    .action-type {
+      font-size: 10px;
+      font-weight: 600;
+      padding: 4px 8px;
+      border-radius: 4px;
+      background: var(--bubi-sage);
+      color: white;
+      white-space: nowrap;
+    }
+
+    .cal-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .cal-nav-btn {
+      background: transparent;
+      border: none;
+      font-size: 24px;
+      color: var(--bubi-blueprint-strong);
+      cursor: pointer;
+      padding: 8px;
+      width: 44px;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .cal-date-info {
+      text-align: center;
+      flex: 1;
+    }
+
+    .cal-date-day {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--bubi-text);
+      margin-bottom: 4px;
+    }
+
+    .cal-date-week {
+      font-size: 12px;
+      color: var(--bubi-text-secondary);
+      font-weight: 500;
+    }
+
+    .cal-clients-list {
+      margin-top: 12px;
+    }
+
+    .cal-client-row {
+      background: var(--bubi-surface);
+      border: 1px solid var(--bubi-border);
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+    }
+
+    .cal-client-row:active {
+      background: var(--bubi-mist);
+    }
+
+    .cal-client-name {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--bubi-text);
+    }
+
+    .cal-no-clients {
+      text-align: center;
+      color: var(--bubi-text-secondary);
+      padding: 24px;
+      font-size: 13px;
+    }
+
+    .nav-bar {
+      display: flex;
+      background: var(--bubi-surface);
+      border-top: 1px solid var(--bubi-border);
+      flex-shrink: 0;
+      gap: 0;
+    }
+
+    .nav-btn {
+      flex: 1;
+      padding: 12px;
+      background: transparent;
+      border: none;
+      color: var(--bubi-text-secondary);
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+    }
+
+    .nav-btn.active {
+      color: var(--bubi-blueprint-strong);
+      border-bottom-color: var(--bubi-blueprint-strong);
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 64px;
+      left: 16px;
+      right: 16px;
+      background: var(--bubi-sage);
+      color: white;
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s;
+      z-index: 99;
+    }
+
+    .toast.show { opacity: 1; }
+
+    .spacer { height: 8px; }
+
+    .hidden { display: none; }
+
+    .collapsible-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      padding: 12px;
+      background: var(--bubi-mist);
+      border-radius: 8px;
+      margin-bottom: 8px;
+      font-weight: 600;
+      user-select: none;
+    }
+
+    .collapsible-content {
+      padding: 12px;
+      background: var(--bubi-mist);
+      border-radius: 8px;
+      margin-bottom: 8px;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .context-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--bubi-border);
+      font-size: 13px;
+    }
+
+    .context-item:last-child { border-bottom: none; }
+
+    .context-label {
+      color: var(--bubi-text-secondary);
+      font-weight: 500;
+    }
+
+    .context-value {
+      font-weight: 600;
+      color: var(--bubi-text);
+    }
+
+    .tag {
+      display: inline-block;
+      background: var(--bubi-blueprint-strong);
+      color: white;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+      margin-right: 4px;
+      margin-bottom: 4px;
+    }
+
+    .tag.stock-bon { background: var(--bubi-sage); }
+    .tag.stock-faible { background: #D97706; }
+    .tag.stock-probleme { background: #DC2626; }
+
+    .tag.satisfaction-satisfait { background: var(--bubi-sage); }
+    .tag.satisfaction-neutre { background: #F59E0B; }
+    .tag.satisfaction-probleme { background: #DC2626; }
+
+    .modal-backdrop {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      display: none;
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-backdrop.show {
+      display: flex;
+    }
+
+    .modal {
+      background: var(--bubi-surface);
+      border-radius: 12px;
+      padding: 20px;
+      width: 90%;
+      max-width: 400px;
+      box-shadow: 0 20px 25px rgba(0, 0, 0, 0.2);
+    }
+
+    .modal-title {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      color: var(--bubi-text);
+    }
+
+    .feedback-options {
+      margin-bottom: 16px;
+    }
+
+    .feedback-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--bubi-text-secondary);
+      margin-bottom: 8px;
+      display: block;
+    }
+
+    .option-group {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .option-btn {
+      flex: 1;
+      padding: 12px;
+      border: 2px solid var(--bubi-border);
+      background: var(--bubi-surface);
+      color: var(--bubi-text);
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .option-btn.selected {
+      border-color: var(--bubi-blueprint-strong);
+      background: var(--bubi-mist);
+      color: var(--bubi-blueprint-strong);
+      font-weight: 600;
+    }
+
+    .pattern-stat {
+      padding: 8px 0;
+      border-bottom: 1px solid var(--bubi-border);
+      font-size: 13px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .pattern-stat:last-child { border-bottom: none; }
+
+    .stat-label { color: var(--bubi-text-secondary); }
+    .stat-value { font-weight: 600; color: var(--bubi-text); }
+
+    .suggestion-box {
+      background: var(--bubi-mist);
+      border-left: 3px solid var(--bubi-blueprint);
+      padding: 12px;
+      border-radius: 6px;
+      margin: 12px 0;
+      font-size: 13px;
+    }
+
+    .suggestion-box strong {
+      display: block;
+      margin-bottom: 8px;
+      color: var(--bubi-blueprint-strong);
+    }
+
+    .checklist-item {
+      display: flex;
+      align-items: center;
+      padding: 12px;
+      border: 1px solid var(--bubi-border);
+      border-radius: 6px;
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
+
+    .checklist-item input {
+      margin-right: 12px;
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+    }
+
+    .alert-box {
+      background: #FEF3C7;
+      border-left: 3px solid #F59E0B;
+      padding: 12px;
+      border-radius: 6px;
+      margin: 12px 0;
+      font-size: 13px;
+      color: #78350F;
+    }
+
+    .product-item {
+      background: var(--bubi-mist);
+      padding: 12px;
+      border-radius: 6px;
+      margin-bottom: 8px;
+      font-size: 13px;
+    }
+
+    .product-name {
+      font-weight: 600;
+      color: var(--bubi-text);
+      margin-bottom: 4px;
+    }
+
+    .product-detail {
+      color: var(--bubi-text-secondary);
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <div class="header-main">
+      <div class="header-title" id="header-greeting">Bonjour</div>
+      <div class="header-stats">
+        <div class="stat-col">
+          <div class="stat-num" id="stat-v">0</div>
+          <div class="stat-lab">Visites</div>
+        </div>
+        <div class="stat-col">
+          <div class="stat-num" id="stat-t">0m</div>
+          <div class="stat-lab">Temps</div>
+        </div>
+        <div class="stat-col">
+          <div class="stat-num" id="stat-a">0</div>
+          <div class="stat-lab">Actions</div>
+        </div>
+      </div>
+    </div>
+    <div class="header-info">
+      <div class="header-date" id="h-date"></div>
+      <div class="header-badge" id="h-week"></div>
+    </div>
+  </div>
+
+  <div class="main">
+    <div id="screen-accueil" class="screen active">
+      <div class="widgets-row">
+        <div class="km-widget" onclick="toggleKmInput()">
+          <div class="km-widget-value" id="km-today">0</div>
+          <div class="km-widget-label">km</div>
+        </div>
+        <div class="recap-widget" onclick="toggleRecapPanel()">
+          <div class="recap-widget-value" id="recap-count">0</div>
+          <div class="recap-widget-label">Recap</div>
+        </div>
+      </div>
+
+      <div id="recap-panel" class="card hidden">
+        <div class="card-title">Récap du jour</div>
+        <textarea id="recap-text" class="field" style="min-height: 150px; resize: vertical; background: var(--bubi-mist); border: none; padding: 12px; font-size: 12px; line-height: 1.5;" readonly></textarea>
+        <button class="btn-small" onclick="copyRecap()" style="margin-top: 12px; margin-bottom: 12px;">Copier</button>
+        <button class="btn-small" onclick="closeRecapPanel()" style="background: var(--bubi-text-secondary);">Fermer</button>
+      </div>
+
+      <div id="km-panel" class="card hidden">
+        <div style="background: var(--bubi-blueprint-strong); color: white; border-radius: 8px; padding: 12px; margin-bottom: 16px; text-align: center;">
+          <div style="font-size: 10px; font-weight: 600; text-transform: uppercase; opacity: 0.9; margin-bottom: 4px;">Total du jour</div>
+          <div style="font-size: 28px; font-weight: 700;" id="km-today-banner">0</div>
+          <div style="font-size: 12px; opacity: 0.9;">km</div>
+        </div>
+
+        <div class="section-label">Ajouter</div>
+        <div style="display: flex; gap: 8px; margin-bottom: 16px;">
+          <input type="number" id="km-input" class="field" placeholder="0" min="0" style="flex: 1; margin-bottom: 0;">
+          <button class="btn-small" onclick="saveKm()" style="width: 44px; padding: 12px;">OK</button>
+        </div>
+
+        <div class="section-label">Historique</div>
+        <div id="km-history-list"></div>
+
+        <button class="btn-small" onclick="closeKmInput()" style="margin-top: 16px; background: var(--bubi-text-secondary);">Fermer</button>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Aujourd'hui</div>
+        <div id="clients-list"></div>
+      </div>
+
+      <button class="btn-primary" onclick="switchScreen('visite')">+ Nouvelle visite</button>
+      <div class="spacer"></div>
+    </div>
+
+    <div id="screen-visite" class="screen">
+      <div class="card">
+        <div class="card-title">Visite</div>
+
+        <!-- FEATURE 1: CLIENT CONTEXT CARD -->
+        <div id="client-context-card" class="hidden" style="margin-bottom: 16px;">
+          <div class="collapsible-header" onclick="toggleClientContext()">
+            <span id="context-client-name">Client</span>
+            <span id="context-toggle">▼</span>
+          </div>
+          <div id="client-context-content" class="collapsible-content">
+            <div class="context-item">
+              <span class="context-label">Dernier passage</span>
+              <span class="context-value" id="context-last-visit">—</span>
+            </div>
+            <div class="context-item">
+              <span class="context-label">Temps passé</span>
+              <span class="context-value" id="context-time-spent">—</span>
+            </div>
+            <div class="context-item">
+              <span class="context-label">Actions récentes</span>
+              <span class="context-value" id="context-actions">—</span>
+            </div>
+            <div class="context-item">
+              <span class="context-label">Satisfaction</span>
+              <span id="context-satisfaction">—</span>
+            </div>
+            <div class="context-item">
+              <span class="context-label">Stock</span>
+              <span id="context-stock">—</span>
+            </div>
+            <div class="context-item">
+              <span class="context-label">Type</span>
+              <span class="context-value" id="context-type">—</span>
+            </div>
+            <div id="context-notes" style="margin-top: 8px; font-size: 12px; color: var(--bubi-text-secondary); padding-top: 8px; border-top: 1px solid var(--bubi-border);"></div>
+          </div>
+        </div>
+
+        <div id="visit-note" class="note-box hidden">
+          <div class="note-label">Dernier passage</div>
+          <div id="visit-note-text"></div>
+        </div>
+
+        <div class="section-label">Client</div>
+
+        <div style="font-size: 12px; color: var(--bubi-text-secondary); margin-bottom: 6px; font-weight: 500;">Clients programmés pour aujourd'hui (S1)</div>
+        <select id="client-select" class="field" onchange="selectClient()">
+          <option value="">Clients du jour</option>
+          <option value="__prospect__">Prospect / Autre</option>
+        </select>
+
+        <div style="font-size: 12px; color: var(--bubi-text-secondary); margin: 12px 0 6px 0; font-weight: 500;">Ou chercher dans l'historique</div>
+        <button class="btn-small" onclick="toggleAllClientsPanel()" style="margin-bottom: 12px; background: var(--bubi-text-secondary);">Tous mes clients</button>
+
+        <div id="all-clients-panel" class="hidden" style="background: var(--bubi-mist); border-radius: 8px; padding: 12px; margin-bottom: 12px;">
+          <!-- FEATURE 8: NIGHT REPORT -->
+      <div id="night-report-widget" class="card hidden" style="margin-bottom: 16px;">
+        <div class="card-title">Résumé du jour</div>
+        <div id="night-report-content" style="font-size: 13px; line-height: 1.6;"></div>
+        <div style="display: flex; gap: 8px; margin-top: 12px;">
+          <button class="btn-small" onclick="shareNightReport()" style="flex: 1; font-size: 12px;">Partager</button>
+          <button class="btn-small" onclick="exportNightReport()" style="flex: 1; background: var(--bubi-text-secondary); font-size: 12px;">Exporter</button>
+        </div>
+      </div>
+
+      <div class="section-label">Clients précédents</div>
+          <input type="text" id="all-clients-search" class="field" placeholder="Chercher un client..." style="margin-bottom: 12px;" oninput="filterAllClients()">
+          <div id="all-clients-list" style="max-height: 200px; overflow-y: auto;"></div>
+          <button class="btn-small" onclick="closeAllClientsPanel()" style="margin-top: 12px; background: var(--bubi-text-secondary); width: 100%;">Fermer</button>
+        </div>
+
+        <input type="text" id="prospect-name" class="field hidden" placeholder="Nom du prospect...">
+
+        <div class="section-label">Horaires</div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px;">
+          <div>
+            <div style="font-size: 12px; color: var(--bubi-text-secondary); margin-bottom: 4px;">Arrivée</div>
+            <div id="time-in-display" style="padding: 10px; background: var(--bubi-mist); border-radius: 6px; text-align: center; font-weight: 600; cursor: pointer; font-size: 14px;" onclick="recordIn()">—</div>
+          </div>
+          <div>
+            <div style="font-size: 12px; color: var(--bubi-text-secondary); margin-bottom: 4px;">Départ</div>
+            <div id="time-out-display" style="padding: 10px; background: var(--bubi-mist); border-radius: 6px; text-align: center; font-weight: 600; cursor: pointer; font-size: 14px;" onclick="recordOut()">—</div>
+          </div>
+        </div>
+        <button class="btn-small" onclick="toggleEditTimes()" style="margin-bottom: 12px; background: var(--bubi-text-secondary);">Modifier horaires</button>
+
+        <div id="edit-times-panel" class="hidden" style="background: var(--bubi-mist); border-radius: 8px; padding: 12px; margin-bottom: 12px;">
+          <div class="section-label">Ajuster les horaires</div>
+          <div style="margin-bottom: 8px;">
+            <label style="font-size: 12px; color: var(--bubi-text-secondary); display: block; margin-bottom: 4px;">Heure d'arrivée</label>
+            <input type="time" id="edit-time-in" class="field" style="margin-bottom: 0;">
+          </div>
+          <div style="margin-bottom: 12px;">
+            <label style="font-size: 12px; color: var(--bubi-text-secondary); display: block; margin-bottom: 4px;">Heure de départ</label>
+            <input type="time" id="edit-time-out" class="field" style="margin-bottom: 0;">
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+            <button class="btn-small" onclick="saveEditTimes()">OK</button>
+            <button class="btn-small" onclick="closeEditTimes()" style="background: var(--bubi-text-secondary);">Annuler</button>
+          </div>
+        </div>
+
+        <!-- FEATURE 3: ACTION HINTS -->
+        <div id="action-hints" class="hidden">
+          <div class="suggestion-box">
+            <strong>👉 Actions récentes chez ce client:</strong>
+            <div id="hints-list" style="margin-top: 8px;"></div>
+            <div style="display: flex; gap: 8px; margin-top: 8px;">
+              <button class="btn-small" onclick="acceptActionHint()" style="flex: 1; font-size: 12px;">Accepter</button>
+              <button class="btn-small" onclick="dismissActionHint()" style="flex: 1; background: var(--bubi-text-secondary); font-size: 12px;">Ignorer</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-label">Action (optionnel)</div>
+        <select id="action-type" class="field" onchange="handleActionTypeChange()">
+          <option value="">Pas d'action</option>
+          <option value="commande">Commande</option>
+          <option value="catalogue">Catalogue saisonnier</option>
+          <option value="prospect">Prospect</option>
+          <option value="relance">Relance suivi</option>
+          <option value="tache">Tâche</option>
+        </select>
+
+        <div id="prospect-note" class="note-box hidden" style="margin-top: 12px;">
+          <div class="note-label">Prospect</div>
+          <div>Pour créer/envoyer mail de prospection</div>
+        </div>
+
+        <div id="action-fields" class="hidden">
+          <div class="section-label">Description</div>
+          <textarea id="action-desc" class="field" placeholder="(optionnel)"></textarea>
+
+          <div class="section-label">Date <span id="action-date-req" style="color: var(--bubi-blueprint-strong);"></span></div>
+          <input type="date" id="action-date" class="field">
+        </div>
+
+        <div id="visit-actions-list" style="margin: 12px 0; padding: 12px; background: var(--bubi-mist); border-radius: 8px; display: none;">
+          <div class="section-label">Actions attachées</div>
+          <div id="visit-actions-display"></div>
+        </div>
+
+        <!-- FEATURE 9: PRODUCT CONTEXT -->
+        <div id="products-context" class="hidden">
+          <div class="section-label">À proposer aujourd'hui</div>
+          <div id="products-list" style="margin-bottom: 12px;"></div>
+        </div>
+
+        <!-- FEATURE 7: CLIENT TYPE SELECTOR (embedded) -->
+        <div class="section-label">Type de client</div>
+        <select id="client-type" class="field" style="margin-bottom: 12px;">
+          <option value="">Non catégorisé</option>
+          <option value="Centrale">Centrale</option>
+          <option value="Indépendant">Indépendant</option>
+          <option value="E-commerce">E-commerce</option>
+          <option value="Autre">Autre</option>
+        </select>
+
+        <div class="section-label">Notes</div>
+        <textarea id="visit-notes" class="field" placeholder="Ajouter une note..."></textarea>
+        <button class="btn-primary" onclick="saveVisit()">Enregistrer visite</button>
+      </div>
+
+      <div class="spacer"></div>
+    </div>
+
+    <div id="screen-histo" class="screen">
+      <!-- FEATURE 5: RECAP SMARTER -->
+      <div id="day-patterns-widget" class="card hidden" style="margin-bottom: 16px;">
+        <div class="card-title">Patterns du jour</div>
+        <div id="patterns-content" style="font-size: 13px;"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Visites</div>
+        <div id="histo-visits"></div>
+        <div id="histo-detail" class="hidden" style="margin-top: 12px; padding: 12px; background: var(--bubi-mist); border-radius: 6px;">
+          <div class="section-label">Détails (avec feedback)</div>
+          <div id="histo-detail-content"></div>
+          <button class="btn-small" onclick="closeHistoDetail()" style="margin-top: 8px;">Fermer</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Actions</div>
+        <div id="histo-actions"></div>
+      </div>
+      <div class="spacer"></div>
+    </div>
+
+    <div id="screen-cal" class="screen">
+      <div class="card">
+        <div class="cal-nav">
+          <button class="cal-nav-btn" onclick="calPrevDay()">←</button>
+          <div class="cal-date-info">
+            <div class="cal-date-day" id="cal-date-display"></div>
+            <div class="cal-date-week" id="cal-week-display"></div>
+          </div>
+          <button class="cal-nav-btn" onclick="calNextDay()">→</button>
+        </div>
+        <div class="cal-clients-list" id="cal-clients"></div>
+      </div>
+      <div class="spacer"></div>
+    </div>
+  </div>
+
+  <div class="nav-bar">
+    <button class="nav-btn active" onclick="switchScreen('accueil')">Accueil</button>
+    <button class="nav-btn" onclick="switchScreen('visite')">Visite</button>
+    <button class="nav-btn" onclick="switchScreen('histo')">Histo</button>
+    <button class="nav-btn" onclick="switchScreen('cal')">Mois</button>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <!-- FEATURE 2: QUICK FEEDBACK MODAL -->
+  <div class="modal-backdrop" id="feedback-modal-backdrop">
+    <div class="modal">
+      <div class="modal-title">Comment ça s'est passé?</div>
+
+      <div class="feedback-options">
+        <label class="feedback-label">Stock</label>
+        <div class="option-group">
+          <button class="option-btn" onclick="setFeedback('stock', 'Bon')">Bon</button>
+          <button class="option-btn" onclick="setFeedback('stock', 'Faible')">Faible</button>
+          <button class="option-btn" onclick="setFeedback('stock', 'Problème')">Problème</button>
+        </div>
+      </div>
+
+      <div class="feedback-options">
+        <label class="feedback-label">Satisfaction</label>
+        <div class="option-group">
+          <button class="option-btn" onclick="setFeedback('satisfaction', 'Satisfait')">Satisfait</button>
+          <button class="option-btn" onclick="setFeedback('satisfaction', 'Neutre')">Neutre</button>
+          <button class="option-btn" onclick="setFeedback('satisfaction', 'Problème')">Problème</button>
+        </div>
+      </div>
+
+      <div class="feedback-options">
+        <label class="feedback-label">Commande?</label>
+        <div class="option-group">
+          <button class="option-btn" onclick="setFeedback('order', 'Oui')">Oui</button>
+          <button class="option-btn" onclick="setFeedback('order', 'Non')">Non</button>
+          <button class="option-btn" onclick="setFeedback('order', 'Peut-être')">Peut-être</button>
+        </div>
+      </div>
+
+      <div class="feedback-options">
+        <label class="feedback-label">Note (optionnel)</label>
+        <textarea id="feedback-notes" class="field" placeholder="Ajouter une note..." style="min-height: 60px;"></textarea>
+      </div>
+
+      <button class="btn-primary" onclick="saveFeedbackAndClose()">Valider</button>
+      <button class="btn-small" onclick="closeFeedbackModal()" style="background: var(--bubi-text-secondary); width: 100%; margin-top: 8px;">Ignorer</button>
+    </div>
+  </div>
+
+  <!-- FEATURE 10: SMART CLOSE CHECKLIST -->
+  <div class="modal-backdrop" id="close-checklist-backdrop">
+    <div class="modal">
+      <div class="modal-title">Vérifier avant de partir</div>
+
+      <div id="checklist-content" style="margin-bottom: 16px;"></div>
+
+      <div id="alerts-content" class="hidden" style="margin-bottom: 16px;"></div>
+
+      <div id="tomorrow-preview" class="hidden" style="margin-bottom: 16px;">
+        <div class="section-label">À faire demain</div>
+        <div id="tomorrow-content" style="font-size: 13px;"></div>
+      </div>
+
+      <button class="btn-primary" onclick="closeSmartCloseModal()">Fermer l'app</button>
+    </div>
+  </div>
+
+  <!-- FEATURE 6: ROUTE SUGGESTION -->
+  <div class="modal-backdrop" id="route-suggestion-backdrop">
+    <div class="modal">
+      <div class="modal-title">Parcours optimisé</div>
+      <div id="route-content" style="font-size: 13px; line-height: 1.6; margin-bottom: 16px;"></div>
+      <div style="display: flex; gap: 8px;">
+        <button class="btn-primary" onclick="applyOptimizedRoute()" style="flex: 1;">Appliquer</button>
+        <button class="btn-small" onclick="closeRouteSuggestion()" style="flex: 1; background: var(--bubi-text-secondary);">Ignorer</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let db = null;
+    let visit = { client: null, in: null, out: null, actions: [], feedback: null, clientType: null };
+    let histoVisitsCache = [];
+    let histoActionsCache = [];
+    let clientContextCollapsed = true;
+    let currentFeedback = { stock: null, satisfaction: null, order: null, notes: '' };
+    let clientDatabase = new Map(); // clientName -> {type, zone, lastOrderDate, visitCount, etc}
+
+    const PLAN = {
+      'S1': {
+        'Lundi': ['Blagnac - E.Leclerc', 'Blagnac - Espace Animalia Service', 'Saint-Jory - Jardinerie Grégori'],
+        'Mardi': ['Montauban - Animal Factory', 'Montauban - Rural Master', 'Montauban - Croqdis', 'Négrepelisse - Gamm Vert'],
+        'Mercredi': ['Gramat - Brico E.Leclerc', 'Figeac - Jardinerie Delbard', 'Biars-sur-Cère - Brico Leclerc', 'Souillac - Brico E.Leclerc'],
+        'Jeudi': ['Garidech - Gamm Vert', 'Bessières - Jardinerie Solignac', 'Couffouleux - Jardinerie Jamans', 'Gaillac - Gamm Vert'],
+        'Vendredi': ['Toulouse - Terranimo', 'Toulouse - Cani Cat']
+      },
+      'S2': {
+        'Lundi': ['Balma - Animal Protect', 'Ramonville - Les Compagnons d\'Oc', 'Villefranche-de-Lauragais - Jardin de Jade', 'Revel - Gamm Vert'],
+        'Mardi': ['Castelnaudary - Gamm Vert', 'Bram - Gamm Vert', 'Carcassonne - Gamm Vert', 'Carcassonne - Bricomarché', 'Carcassonne - La Halle aux Grains'],
+        'Mercredi': ['Foix - Gamm Vert', 'Limoux - MR Bricolage', 'Carcassonne - Ky\'Croq', 'Carcassonne - Agriartisan'],
+        'Jeudi': ['Lavaur - Animal Protect', 'Castres - Jardinerie Tarnaise', 'Mazamet - Cap Animal', 'Aussillon - Gamm Vert'],
+        'Vendredi': ['Plaisance-du-Touch - Point Vert']
+      },
+      'S3': {
+        'Lundi': ['Muret - Le Point Croquette', 'Eaunes - La Boutique à Pierrot', 'Auterive - Croquettes et Cie', 'Auterive - Animoccitanie'],
+        'Mardi': ['Auch - Animal Factory', 'Marciac - Jardiboutique', 'Barbazan-Debat - Comptoir du Toilettage'],
+        'Mercredi': ['Ibos - Brico Jardi E.Leclerc', 'Landorthe - DO&KA Saint-Gaudens', 'Martres-Tolosane - Animal Factory'],
+        'Jeudi': ['Le Séquestre - Jardinerie Tarnaise Fonlabour', 'Albi - Coin des Croquettes', 'Albi - Jardinerie Tarnaise', 'Carmaux - Gamm Vert']
+      }
+    };
+
+    function getWeek(date) {
+      const d = date || new Date();
+      // 3-week cycle starting Sept 14, 2026 (Sunday)
+      // Sept 14-20 = S1, Sept 21-27 = S2, Sept 28-Oct 4 = S3, then repeat
+      const cycleStart = new Date(2026, 8, 14); // Sept 14, 2026
+      const daysDiff = Math.floor((d - cycleStart) / 86400000);
+      const weekInCycle = Math.floor((daysDiff % 21) / 7);
+      return ['S1', 'S2', 'S3'][weekInCycle];
+    }
+
+    function getClients(d) {
+      const dayNames = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
+      const day = dayNames[d.getDay()];
+      const start = new Date(2026, 8, 14);
+      const days = Math.floor((d - start) / 86400000);
+      const week = ['S1', 'S2', 'S3'][((days % 21) / 7) | 0];
+      return (PLAN[week] && PLAN[week][day]) || [];
+    }
+
+    function fmt(d) {
+      return d.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
+    }
+
+    function fmtTime(d) {
+      return d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+    }
+
+    function toast(msg) {
+      const el = document.getElementById('toast');
+      el.textContent = msg;
+      el.classList.add('show');
+      setTimeout(() => el.classList.remove('show'), 2000);
+    }
+
+    function switchScreen(s) {
+      document.querySelectorAll('.screen').forEach(e => e.classList.remove('active'));
+      document.querySelectorAll('.nav-btn').forEach(e => e.classList.remove('active'));
+      document.getElementById('screen-' + s).classList.add('active');
+      ['accueil', 'visite', 'histo', 'cal'].forEach((n, i) => {
+        if (n === s) document.querySelectorAll('.nav-btn')[i].classList.add('active');
+      });
+      if (s === 'histo') loadHisto();
+      if (s === 'cal') loadCal();
+      if (s === 'visite') {
+        updateActionDateRequired();
+        displayAttachedActions();
+      }
+      if (s === 'accueil') {
+        // FEATURE 6: Suggest route optimization when returning to home
+        setTimeout(() => suggestOptimizedRoute(), 500);
+      }
+    }
+
+    function initDB() {
+      return new Promise((resolve, reject) => {
+        const req = indexedDB.open('BubiMate', 3);
+        req.onerror = () => reject(req.error);
+        req.onsuccess = () => { db = req.result; buildClientDatabase(); resolve(); };
+        req.onupgradeneeded = (e) => {
+          const d = e.target.result;
+          ['visits', 'km'].forEach(s => {
+            if (!d.objectStoreNames.contains(s)) d.createObjectStore(s, { keyPath: 'id', autoIncrement: true });
+          });
+          if (d.objectStoreNames.contains('actions')) d.deleteObjectStore('actions');
+        };
+      });
+    }
+
+    async function buildClientDatabase() {
+      const visits = await dbGetAll('visits');
+      clientDatabase.clear();
+
+      visits.forEach(v => {
+        if (v.client) {
+          if (!clientDatabase.has(v.client)) {
+            clientDatabase.set(v.client, {
+              name: v.client,
+              type: v.clientType || '',
+              visitDates: [],
+              feedback: [],
+              actions: [],
+              lastVisit: null,
+              totalTime: 0
+            });
+          }
+          const record = clientDatabase.get(v.client);
+          record.visitDates.push(v.date);
+          record.lastVisit = v.date;
+          if (v.startTime && v.endTime) {
+            record.totalTime += (new Date(v.endTime) - new Date(v.startTime)) / 60000;
+          }
+          if (v.feedback) record.feedback.push(v.feedback);
+          if (v.actions) record.actions.push(...v.actions);
+          if (v.clientType) record.type = v.clientType;
+        }
+      });
+    }
+
+    function dbAdd(store, data) {
+      return new Promise((resolve, reject) => {
+        const tx = db.transaction(store, 'readwrite');
+        const req = tx.objectStore(store).add(data);
+        req.onsuccess = () => resolve(req.result);
+        req.onerror = () => reject(req.error);
+      });
+    }
+
+    function dbGetAll(store) {
+      return new Promise((resolve, reject) => {
+        const tx = db.transaction(store, 'readonly');
+        const req = tx.objectStore(store).getAll();
+        req.onsuccess = () => resolve(req.result);
+        req.onerror = () => reject(req.error);
+      });
+    }
+
+    async function loadClients() {
+      const sel = document.getElementById('client-select');
+      getClients(new Date()).forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c;
+        opt.textContent = c;
+        sel.appendChild(opt);
+      });
+    }
+
+    let allClientsCache = [];
+
+    function selectClient() {
+      const c = document.getElementById('client-select').value;
+      const prospectInput = document.getElementById('prospect-name');
+
+      if (c === '__prospect__') {
+        prospectInput.classList.remove('hidden');
+        visit.client = null;
+      } else if (c !== '') {
+        prospectInput.classList.add('hidden');
+        visit.client = c;
+        loadNote(c);
+      } else {
+        prospectInput.classList.add('hidden');
+      }
+    }
+
+    async function loadAllClients() {
+      const visits = await dbGetAll('visits');
+      const clientSet = new Map(); // client -> most recent date
+
+      visits.forEach(v => {
+        if (v.client) {
+          if (!clientSet.has(v.client) || new Date(v.date) > new Date(clientSet.get(v.client))) {
+            clientSet.set(v.client, v.date);
+          }
+        }
+      });
+
+      // Convert to array and sort by most recent
+      allClientsCache = Array.from(clientSet.entries())
+        .sort((a, b) => new Date(b[1]) - new Date(a[1]))
+        .slice(0, 20)
+        .map(entry => entry[0]);
+
+      displayAllClients();
+    }
+
+    function displayAllClients() {
+      const search = document.getElementById('all-clients-search').value.toLowerCase();
+      const filtered = allClientsCache.filter(c =>
+        c.toLowerCase().includes(search)
+      );
+
+      const list = document.getElementById('all-clients-list');
+      if (filtered.length === 0) {
+        list.innerHTML = '<div style="font-size: 13px; color: var(--bubi-text-secondary); text-align: center; padding: 12px;">Aucun client trouvé</div>';
+      } else {
+        list.innerHTML = filtered.map(c => {
+          return '<div class="cal-client-row" onclick="selectFromAllClients(\'' + c.replace(/'/g, "\\'") + '\')"><span class="cal-client-name">' + c + '</span><span>→</span></div>';
+        }).join('');
+      }
+    }
+
+    function filterAllClients() {
+      displayAllClients();
+    }
+
+    async function toggleAllClientsPanel() {
+      const panel = document.getElementById('all-clients-panel');
+      if (panel.classList.contains('hidden')) {
+        panel.classList.remove('hidden');
+        await loadAllClients();
+      } else {
+        panel.classList.add('hidden');
+      }
+    }
+
+    function closeAllClientsPanel() {
+      document.getElementById('all-clients-panel').classList.add('hidden');
+      document.getElementById('all-clients-search').value = '';
+    }
+
+    function selectFromAllClients(client) {
+      visit.client = client;
+      document.getElementById('client-select').value = client;
+      document.getElementById('prospect-name').classList.add('hidden');
+      loadNote(client);
+      closeAllClientsPanel();
+    }
+
+    async function loadNote(c) {
+      if (!c) {
+        document.getElementById('visit-note').classList.add('hidden');
+        document.getElementById('client-context-card').classList.add('hidden');
+        return;
+      }
+      const visits = await dbGetAll('visits');
+      const last = visits.filter(v => v.client === c).slice(-1)[0];
+      if (last && last.notes) {
+        document.getElementById('visit-note').classList.remove('hidden');
+        document.getElementById('visit-note-text').textContent = last.notes;
+      } else {
+        document.getElementById('visit-note').classList.add('hidden');
+      }
+
+      // FEATURE 1: Show client context card
+      await displayClientContext(c);
+      // FEATURE 3: Show action hints
+      await displayActionHints(c);
+      // FEATURE 9: Show product context
+      displayProductContext(c);
+    }
+
+    // FEATURE 1: Client Context Card
+    async function displayClientContext(clientName) {
+      const clientInfo = clientDatabase.get(clientName);
+      if (!clientInfo) {
+        document.getElementById('client-context-card').classList.add('hidden');
+        return;
+      }
+
+      document.getElementById('client-context-card').classList.remove('hidden');
+      document.getElementById('context-client-name').textContent = clientName;
+
+      const visits = await dbGetAll('visits');
+      const clientVisits = visits.filter(v => v.client === clientName).sort((a, b) => new Date(b.date) - new Date(a.date));
+
+      if (clientVisits.length > 0) {
+        const lastVisit = clientVisits[0];
+        const daysDiff = Math.floor((new Date() - new Date(lastVisit.date)) / 86400000);
+        const daysAgo = daysDiff === 0 ? 'Aujourd\'hui' : daysDiff === 1 ? 'Hier' : daysDiff + ' jours';
+        document.getElementById('context-last-visit').textContent = daysAgo;
+
+        const timeSpent = Math.round(clientInfo.totalTime);
+        document.getElementById('context-time-spent').textContent = timeSpent + 'm';
+
+        const recentActions = clientVisits.slice(0, 3).flatMap(v => v.actions || []);
+        const actionTypes = [...new Set(recentActions.map(a => a.type))].slice(0, 3);
+        document.getElementById('context-actions').textContent = actionTypes.length > 0 ? actionTypes.join(', ') : '—';
+
+        // Show latest feedback tags
+        const lastFeedback = clientVisits.find(v => v.feedback);
+        if (lastFeedback) {
+          const fb = lastFeedback.feedback;
+          let satisfactionTag = '';
+          if (fb.satisfaction) {
+            const tagClass = 'satisfaction-' + fb.satisfaction.toLowerCase().replace('-', '');
+            satisfactionTag = '<span class="tag ' + tagClass + '">' + fb.satisfaction + '</span>';
+          }
+          document.getElementById('context-satisfaction').innerHTML = satisfactionTag || '—';
+
+          let stockTag = '';
+          if (fb.stock) {
+            const tagClass = 'stock-' + fb.stock.toLowerCase().replace('-', '');
+            stockTag = '<span class="tag ' + tagClass + '">' + fb.stock + '</span>';
+          }
+          document.getElementById('context-stock').innerHTML = stockTag || '—';
+        } else {
+          document.getElementById('context-satisfaction').innerHTML = '—';
+          document.getElementById('context-stock').innerHTML = '—';
+        }
+      }
+
+      document.getElementById('context-type').textContent = clientInfo.type || '—';
+
+      // Show last notes
+      const lastWithNotes = clientVisits.find(v => v.notes);
+      if (lastWithNotes) {
+        document.getElementById('context-notes').textContent = 'Note: ' + lastWithNotes.notes;
+      } else {
+        document.getElementById('context-notes').textContent = '';
+      }
+    }
+
+    function toggleClientContext() {
+      const content = document.getElementById('client-context-content');
+      const toggle = document.getElementById('context-toggle');
+      clientContextCollapsed = !clientContextCollapsed;
+      if (clientContextCollapsed) {
+        content.style.display = 'none';
+        toggle.textContent = '▶';
+      } else {
+        content.style.display = 'block';
+        toggle.textContent = '▼';
+      }
+    }
+
+    // FEATURE 3: Action Hints
+    async function displayActionHints(clientName) {
+      const visits = await dbGetAll('visits');
+      const clientVisits = visits.filter(v => v.client === clientName).sort((a, b) => new Date(b.date) - new Date(a.date));
+
+      if (clientVisits.length < 2) {
+        document.getElementById('action-hints').classList.add('hidden');
+        return;
+      }
+
+      // Parse last 10 visits
+      const recentActions = [];
+      clientVisits.slice(0, 10).forEach(v => {
+        if (v.actions) {
+          v.actions.forEach(a => {
+            recentActions.push(a.type);
+          });
+        }
+      });
+
+      if (recentActions.length === 0) {
+        document.getElementById('action-hints').classList.add('hidden');
+        return;
+      }
+
+      // Find most common action
+      const actionCounts = {};
+      recentActions.forEach(a => {
+        actionCounts[a] = (actionCounts[a] || 0) + 1;
+      });
+      const sortedActions = Object.entries(actionCounts).sort((a, b) => b[1] - a[1]);
+
+      if (sortedActions.length > 0) {
+        document.getElementById('action-hints').classList.remove('hidden');
+        const hintsList = document.getElementById('hints-list');
+        hintsList.innerHTML = sortedActions.slice(0, 3).map(([type, count]) => {
+          return '<div style="margin-bottom: 6px;">• ' + type + ' (' + count + 'x)</div>';
+        }).join('');
+
+        window.lastHintedAction = sortedActions[0][0];
+      } else {
+        document.getElementById('action-hints').classList.add('hidden');
+      }
+    }
+
+    function acceptActionHint() {
+      if (window.lastHintedAction) {
+        document.getElementById('action-type').value = window.lastHintedAction;
+        handleActionTypeChange();
+        document.getElementById('action-hints').classList.add('hidden');
+      }
+    }
+
+    function dismissActionHint() {
+      document.getElementById('action-hints').classList.add('hidden');
+    }
+
+    // FEATURE 9: Product Context
+    function displayProductContext(clientName) {
+      const season = getCurrentSeason();
+      const products = getSeasonalProducts(season);
+
+      if (products.length === 0) {
+        document.getElementById('products-context').classList.add('hidden');
+        return;
+      }
+
+      document.getElementById('products-context').classList.remove('hidden');
+      const productsList = document.getElementById('products-list');
+      productsList.innerHTML = products.map(p => {
+        return '<div class="product-item">' +
+                 '<div class="product-name">' + p.name + '</div>' +
+                 '<div class="product-detail">' + p.price + ' ' + (p.stock ? '· ' + p.stock + ' en stock' : '') + '</div>' +
+                 '</div>';
+      }).join('');
+    }
+
+    function getCurrentSeason() {
+      const month = new Date().getMonth();
+      if (month >= 2 && month <= 4) return 'Printemps';
+      if (month >= 5 && month <= 7) return 'Été';
+      if (month >= 8 && month <= 10) return 'Automne';
+      return 'Hiver';
+    }
+
+    function getSeasonalProducts(season) {
+      const products = {
+        'Printemps': [
+          { name: 'Aliments printemps chat', price: '45€ carton', stock: 'x3' },
+          { name: 'Colliers réflex', price: '12€', stock: 'x10' },
+          { name: 'Catalogue printemps', price: 'Gratuit', stock: '' }
+        ],
+        'Été': [
+          { name: 'Friandises été', price: '52€ carton', stock: 'x2' },
+          { name: 'Jouets durables', price: '18€', stock: 'x5' },
+          { name: 'Catalogue été', price: 'Gratuit', stock: '' }
+        ],
+        'Automne': [
+          { name: 'Friandises chat', price: '87€ carton', stock: 'x2' },
+          { name: 'Colliers réflex', price: '12€', stock: 'x8' },
+          { name: 'Catalogue automne', price: 'Gratuit', stock: '' },
+          { name: 'Panier voyage', price: '24€', stock: 'x3' }
+        ],
+        'Hiver': [
+          { name: 'Aliments hiver', price: '72€ carton', stock: 'x4' },
+          { name: 'Couvertures thermiques', price: '35€', stock: 'x2' },
+          { name: 'Catalogue hiver', price: 'Gratuit', stock: '' }
+        ]
+      };
+      return products[season] || [];
+    }
+
+    function recordIn() {
+      if (!visit.client) { toast('Choisir client'); return; }
+      visit.in = new Date();
+      updateTime();
+    }
+
+    function recordOut() {
+      if (!visit.client) { toast('Choisir client'); return; }
+      visit.out = new Date();
+      updateTime();
+    }
+
+    function updateTime() {
+      const inDisplay = document.getElementById('time-in-display');
+      const outDisplay = document.getElementById('time-out-display');
+
+      if (visit.in) {
+        inDisplay.textContent = fmtTime(visit.in);
+        inDisplay.style.background = 'var(--bubi-sage)';
+        inDisplay.style.color = 'white';
+      } else {
+        inDisplay.textContent = '—';
+        inDisplay.style.background = 'var(--bubi-mist)';
+        inDisplay.style.color = 'var(--bubi-text)';
+      }
+
+      if (visit.out) {
+        outDisplay.textContent = fmtTime(visit.out);
+        outDisplay.style.background = 'var(--bubi-sage)';
+        outDisplay.style.color = 'white';
+      } else {
+        outDisplay.textContent = '—';
+        outDisplay.style.background = 'var(--bubi-mist)';
+        outDisplay.style.color = 'var(--bubi-text)';
+      }
+    }
+
+    function toggleEditTimes() {
+      const panel = document.getElementById('edit-times-panel');
+      if (panel.classList.contains('hidden')) {
+        panel.classList.remove('hidden');
+        const inInput = document.getElementById('edit-time-in');
+        const outInput = document.getElementById('edit-time-out');
+
+        if (visit.in) {
+          const pad = (n) => String(n).padStart(2, '0');
+          inInput.value = pad(visit.in.getHours()) + ':' + pad(visit.in.getMinutes());
+        }
+        if (visit.out) {
+          const pad = (n) => String(n).padStart(2, '0');
+          outInput.value = pad(visit.out.getHours()) + ':' + pad(visit.out.getMinutes());
+        }
+      } else {
+        panel.classList.add('hidden');
+      }
+    }
+
+    function closeEditTimes() {
+      document.getElementById('edit-times-panel').classList.add('hidden');
+    }
+
+    function saveEditTimes() {
+      const inInput = document.getElementById('edit-time-in');
+      const outInput = document.getElementById('edit-time-out');
+
+      if (inInput.value) {
+        const [h, m] = inInput.value.split(':');
+        const today = new Date();
+        visit.in = new Date(today.getFullYear(), today.getMonth(), today.getDate(), parseInt(h), parseInt(m));
+      }
+
+      if (outInput.value) {
+        const [h, m] = outInput.value.split(':');
+        const today = new Date();
+        visit.out = new Date(today.getFullYear(), today.getMonth(), today.getDate(), parseInt(h), parseInt(m));
+      }
+
+      updateTime();
+      closeEditTimes();
+      toast('Horaires modifiés');
+    }
+
+    async function saveVisit() {
+      const prospectName = document.getElementById('prospect-name').value;
+      const client = visit.client || prospectName;
+
+      if (!client || !visit.in) { toast('Remplir tous les champs'); return; }
+
+      // Store visit data temporarily for feedback modal
+      window.pendingVisitData = {
+        date: new Date().toISOString().split('T')[0],
+        client: client,
+        startTime: visit.in.toISOString(),
+        endTime: visit.out ? visit.out.toISOString() : null,
+        notes: document.getElementById('visit-notes').value,
+        actions: visit.actions || [],
+        clientType: document.getElementById('client-type').value || null
+      };
+
+      // Reset form
+      visit = { client: null, in: null, out: null, actions: [], feedback: null, clientType: null };
+      document.getElementById('client-select').value = '';
+      document.getElementById('prospect-name').value = '';
+      document.getElementById('visit-notes').value = '';
+      document.getElementById('action-type').value = '';
+      document.getElementById('action-desc').value = '';
+      document.getElementById('action-date').value = '';
+      document.getElementById('client-type').value = '';
+      document.getElementById('time-in-display').textContent = '—';
+      document.getElementById('time-out-display').textContent = '—';
+      document.getElementById('time-in-display').style.background = 'var(--bubi-mist)';
+      document.getElementById('time-out-display').style.background = 'var(--bubi-mist)';
+      document.getElementById('visit-note').classList.add('hidden');
+      document.getElementById('action-fields').classList.add('hidden');
+      document.getElementById('visit-actions-list').style.display = 'none';
+      document.getElementById('action-hints').classList.add('hidden');
+      document.getElementById('products-context').classList.add('hidden');
+      document.getElementById('client-context-card').classList.add('hidden');
+
+      // FEATURE 2: Show feedback modal
+      currentFeedback = { stock: null, satisfaction: null, order: null, notes: '' };
+      document.getElementById('feedback-notes').value = '';
+      document.querySelectorAll('.option-btn').forEach(btn => btn.classList.remove('selected'));
+      document.getElementById('feedback-modal-backdrop').classList.add('show');
+    }
+
+    // FEATURE 2: Quick Feedback
+    function setFeedback(type, value) {
+      currentFeedback[type] = value;
+      // Visual feedback - highlight selected button
+      const buttons = document.querySelectorAll('.option-btn');
+      buttons.forEach(btn => {
+        if (btn.textContent.trim() === value) {
+          btn.classList.add('selected');
+        } else {
+          btn.classList.remove('selected');
+        }
+      });
+    }
+
+    async function saveFeedbackAndClose() {
+      const feedback = {
+        stock: currentFeedback.stock,
+        satisfaction: currentFeedback.satisfaction,
+        order: currentFeedback.order,
+        notes: document.getElementById('feedback-notes').value,
+        timestamp: new Date().toISOString()
+      };
+
+      window.pendingVisitData.feedback = feedback;
+
+      // Save to DB
+      await dbAdd('visits', window.pendingVisitData);
+      toast('Visite enregistrée');
+
+      // Rebuild client database
+      await buildClientDatabase();
+
+      closeFeedbackModal();
+      loadStats();
+      setTimeout(() => switchScreen('accueil'), 500);
+    }
+
+    function closeFeedbackModal() {
+      document.getElementById('feedback-modal-backdrop').classList.remove('show');
+    }
+
+    function handleActionTypeChange() {
+      const type = document.getElementById('action-type').value;
+      const fieldsPanel = document.getElementById('action-fields');
+      const prospectNote = document.getElementById('prospect-note');
+
+      if (type === '') {
+        fieldsPanel.classList.add('hidden');
+        prospectNote.classList.add('hidden');
+      } else {
+        fieldsPanel.classList.remove('hidden');
+        updateActionDateRequired();
+
+        // Show prospect note only for prospect type
+        if (type === 'prospect') {
+          prospectNote.classList.remove('hidden');
+        } else {
+          prospectNote.classList.add('hidden');
+        }
+
+        // Auto-save commande or catalogue when selected
+        if (type === 'commande' || type === 'catalogue') {
+          setTimeout(() => saveAction(), 100);
+        }
+      }
+    }
+
+    function updateActionDateRequired() {
+      const type = document.getElementById('action-type').value;
+      const req = ['relance', 'tache'].includes(type);
+      document.getElementById('action-date-req').textContent = req ? '*' : '';
+    }
+
+    async function saveAction() {
+      const type = document.getElementById('action-type').value;
+      const desc = document.getElementById('action-desc').value;
+      const date = document.getElementById('action-date').value;
+      const isRequired = ['relance', 'tache'].includes(type);
+
+      if (!type) { toast('Choisir un type d\'action'); return; }
+      if (isRequired && !date) { toast('Choisir date pour relance/tâche'); return; }
+
+      const today = new Date().toISOString().split('T')[0];
+      const actions = [];
+
+      if (type === 'commande') {
+        const dueDate = date || today;
+        actions.push({ type: 'commande', description: 'Confirmation de commande', dueDate });
+      } else if (type === 'catalogue') {
+        const dueDate = date || today;
+        actions.push({ type: 'catalogue', description: 'Catalogue saisonnier', dueDate });
+      } else if (type === 'prospect') {
+        actions.push({ type, description: desc || 'Mail prospection', dueDate: date || today });
+      } else {
+        actions.push({ type, description: desc || 'Action', dueDate: date || today });
+      }
+
+      // Add actions to current visit
+      visit.actions = (visit.actions || []).concat(actions);
+
+      toast('Action ajoutée');
+
+      // Show attached actions list
+      displayAttachedActions();
+
+      // Prompt for iOS reminder if date is not today
+      if (actions.length > 0 && actions[0].dueDate !== today) {
+        setTimeout(() => {
+          if (confirm('Créer rappel iOS pour cette action?')) {
+            actions.forEach(a => createiOSReminder(a.description, a.dueDate, visit.client || 'Client'));
+          }
+        }, 500);
+      }
+
+      // Reset action fields
+      document.getElementById('action-desc').value = '';
+      document.getElementById('action-date').value = '';
+      document.getElementById('action-type').value = '';
+      document.getElementById('action-fields').classList.add('hidden');
+      document.getElementById('prospect-note').classList.add('hidden');
+      updateActionDateRequired();
+    }
+
+    function displayAttachedActions() {
+      const list = document.getElementById('visit-actions-list');
+      const display = document.getElementById('visit-actions-display');
+
+      if (visit.actions && visit.actions.length > 0) {
+        list.style.display = 'block';
+        display.innerHTML = visit.actions.map((a, i) => {
+          return '<div class="action-item" style="padding: 8px 0; border: none;"><span>' + a.description + '</span><span class="action-type">' + a.type + '</span></div>';
+        }).join('');
+      } else {
+        list.style.display = 'none';
+      }
+    }
+
+    function createiOSReminder(title, dueDate, client) {
+      try {
+        const due = new Date(dueDate);
+        const uid = Math.random().toString(36).substr(2, 9);
+
+        const ics = `BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//BubiMate//EN
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+BEGIN:VEVENT
+UID:${uid}@bubimate.local
+DTSTAMP:${formatICS(new Date())}
+DTSTART:${formatICS(due)}
+SUMMARY:${title}
+DESCRIPTION:Client: ${client}\\nApp: BubiMate
+STATUS:CONFIRMED
+END:VEVENT
+END:VCALENDAR`;
+
+        const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
+        const link = document.createElement('a');
+        link.setAttribute('href', URL.createObjectURL(blob));
+        link.setAttribute('download', `reminder-${uid}.ics`);
+        link.setAttribute('type', 'text/calendar');
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+
+        // Trigger click and show success toast
+        link.click();
+        setTimeout(() => {
+          document.body.removeChild(link);
+          toast('Rappel créé');
+        }, 100);
+      } catch (e) {
+        toast('Erreur rappel: ' + e.message);
+      }
+    }
+
+    function formatICS(date) {
+      const pad = (n) => String(n).padStart(2, '0');
+      return date.getFullYear() +
+             pad(date.getMonth() + 1) +
+             pad(date.getDate()) +
+             'T' +
+             pad(date.getHours()) +
+             pad(date.getMinutes()) +
+             pad(date.getSeconds()) +
+             'Z';
+    }
+
+    function adaptKmFontSize() {
+      const kmValue = document.getElementById('km-today').textContent || '0';
+      const el = document.getElementById('km-today');
+
+      let fontSize = 32; // default
+      if (kmValue.length >= 4) {
+        fontSize = 18;
+      } else if (kmValue.length === 3) {
+        fontSize = 24;
+      }
+      el.style.fontSize = fontSize + 'px';
+    }
+
+    async function saveKm() {
+      const km = document.getElementById('km-input').value;
+      if (!km) { toast('Entrer km'); return; }
+      const today = new Date().toISOString().split('T')[0];
+      await dbAdd('km', { date: today, km: parseFloat(km) });
+      document.getElementById('km-input').value = '';
+      toast('Km enregistre');
+      loadStats();
+      loadKmHistory();
+    }
+
+    function toggleKmInput() {
+      const panel = document.getElementById('km-panel');
+      if (panel.classList.contains('hidden')) {
+        panel.classList.remove('hidden');
+        loadKmHistory();
+      } else {
+        panel.classList.add('hidden');
+      }
+    }
+
+    function closeKmInput() {
+      document.getElementById('km-panel').classList.add('hidden');
+    }
+
+    async function toggleRecapPanel() {
+      const panel = document.getElementById('recap-panel');
+      if (panel.classList.contains('hidden')) {
+        panel.classList.remove('hidden');
+        await generateRecap();
+      } else {
+        panel.classList.add('hidden');
+      }
+    }
+
+    function closeRecapPanel() {
+      document.getElementById('recap-panel').classList.add('hidden');
+    }
+
+    async function generateRecap() {
+      const today = new Date().toISOString().split('T')[0];
+      const visits = await dbGetAll('visits');
+      const kms = await dbGetAll('km');
+
+      const tv = visits.filter(v => v.date === today);
+      const tk = kms.filter(k => k.date === today);
+
+      const d = new Date();
+      const dateStr = d.toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+      let report = '=== RAPPORT ' + dateStr.toUpperCase() + ' ===\n\n';
+
+      if (tv.length > 0) {
+        report += 'VISITES (' + tv.length + ')\n';
+        report += '─'.repeat(40) + '\n';
+        tv.forEach((v, i) => {
+          const start = v.startTime ? new Date(v.startTime).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) : '—';
+          const end = v.endTime ? new Date(v.endTime).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) : '—';
+          const duration = v.startTime && v.endTime ? Math.round((new Date(v.endTime) - new Date(v.startTime)) / 60000) : 0;
+          report += (i+1) + '. ' + v.client + ' | ' + start + ' → ' + end + ' (' + duration + 'min)';
+          if (v.actions && v.actions.length > 0) {
+            const actionDescriptions = v.actions.map(a => a.description).join(', ');
+            report += '\n   Actions: ' + actionDescriptions;
+          }
+          if (v.notes) report += '\n   Note: ' + v.notes;
+          report += '\n';
+        });
+        report += '\n';
+      }
+
+      if (tk.length > 0) {
+        const totalKm = tk.reduce((sum, k) => sum + k.km, 0);
+        report += 'KILOMÉTRAGE\n';
+        report += '─'.repeat(40) + '\n';
+        report += 'Total: ' + totalKm + ' km\n';
+        tk.forEach(k => report += '• ' + k.km + ' km\n');
+        report += '\n';
+      }
+
+      document.getElementById('recap-text').value = report;
+    }
+
+    function copyRecap() {
+      const text = document.getElementById('recap-text').value;
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(text).then(() => {
+          toast('Copié au clipboard');
+        }).catch(() => {
+          toast('Erreur copie');
+        });
+      } else {
+        toast('Copie manuelle requise');
+      }
+    }
+
+    async function loadKmHistory() {
+      const kms = await dbGetAll('km');
+      const today = new Date().toISOString().split('T')[0];
+      const todayKms = kms.filter(k => k.date === today);
+      const totalKm = todayKms.reduce((sum, k) => sum + k.km, 0);
+
+      document.getElementById('km-today-banner').textContent = Math.round(totalKm);
+
+      const list = document.getElementById('km-history-list');
+      if (kms.length === 0) {
+        list.innerHTML = '<div style="font-size: 13px; color: var(--bubi-text-secondary);">Aucun historique</div>';
+      } else {
+        list.innerHTML = kms.slice(-10).reverse().map(k => {
+          const date = new Date(k.date).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' });
+          return '<div class="history-item"><span>' + date + '</span><span style="font-weight: 600;">' + k.km + ' km</span></div>';
+        }).join('');
+      }
+    }
+
+    async function loadStats() {
+      const today = new Date().toISOString().split('T')[0];
+      const visits = await dbGetAll('visits');
+      const kms = await dbGetAll('km');
+      const tv = visits.filter(v => v.date === today);
+
+      // Count actions from all visits
+      let totalActions = 0;
+      visits.forEach(v => {
+        if (v.actions && Array.isArray(v.actions)) {
+          totalActions += v.actions.length;
+        }
+      });
+
+      const todayKms = kms.filter(k => k.date === today);
+      const totalKm = todayKms.reduce((sum, k) => sum + k.km, 0);
+
+      let t = 0;
+      tv.forEach(v => {
+        if (v.startTime && v.endTime) t += (new Date(v.endTime) - new Date(v.startTime)) / 60000;
+      });
+
+      document.getElementById('stat-v').textContent = tv.length;
+      document.getElementById('stat-t').textContent = Math.round(t) + 'm';
+      document.getElementById('stat-a').textContent = totalActions;
+      document.getElementById('h-date').textContent = fmt(new Date());
+      document.getElementById('h-week').textContent = getWeek();
+      document.getElementById('km-today').textContent = Math.round(totalKm);
+      adaptKmFontSize();
+      document.getElementById('recap-count').textContent = tv.length;
+
+      const cc = getClients(new Date());
+      const div = document.getElementById('clients-list');
+      if (cc.length === 0) {
+        div.innerHTML = '<div style="font-size: 13px; color: var(--bubi-text-secondary);">Pas de clients</div>';
+      } else {
+        div.innerHTML = cc.map(c => {
+          const done = tv.some(v => v.client === c);
+          const short = c.split(' - ')[1] || c;
+          return '<div class="client-row"><span class="client-name">' + short + '</span><span class="badge' + (done ? ' done' : '') + '">' + (done ? 'Fait' : 'A faire') + '</span></div>';
+        }).join('');
+      }
+    }
+
+    async function loadHisto() {
+      const visits = await dbGetAll('visits');
+      const today = new Date().toISOString().split('T')[0];
+      const todayVisits = visits.filter(v => v.date === today);
+
+      histoVisitsCache = visits.slice(-10).reverse();
+
+      // FEATURE 5: Calculate day patterns
+      await displayDayPatterns(todayVisits);
+
+      // Collect all actions from visits
+      histoActionsCache = [];
+      visits.forEach(v => {
+        if (v.actions && Array.isArray(v.actions)) {
+          v.actions.forEach(a => {
+            histoActionsCache.push({ ...a, clientName: v.client });
+          });
+        }
+      });
+      histoActionsCache = histoActionsCache.slice(-20).reverse();
+
+      const dv = document.getElementById('histo-visits');
+      dv.innerHTML = '';
+      if (histoVisitsCache.length === 0) {
+        dv.innerHTML = '<div style="font-size: 13px; color: var(--bubi-text-secondary);">Aucune</div>';
+      } else {
+        histoVisitsCache.forEach((v, i) => {
+          const start = v.startTime ? new Date(v.startTime).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) : '—';
+          const end = v.endTime ? new Date(v.endTime).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) : '—';
+          const duration = v.startTime && v.endTime ? Math.round((new Date(v.endTime) - new Date(v.startTime)) / 60000) : 0;
+          const actionCount = (v.actions && v.actions.length) || 0;
+          const actionLabel = actionCount > 0 ? ' · ' + actionCount + ' action' + (actionCount > 1 ? 's' : '') : '';
+          let feedbackLabel = '';
+          if (v.feedback) {
+            feedbackLabel = ' · Feedback';
+          }
+          dv.innerHTML += '<div class="history-item" style="cursor: pointer;" onclick="showHistoDetail(' + i + ')"><span>' + v.client + '</span><span style="color: var(--bubi-text-secondary); font-size: 12px;">' + start + ' - ' + end + ' (' + duration + 'min)' + actionLabel + feedbackLabel + '</span></div>';
+        });
+      }
+
+      const da = document.getElementById('histo-actions');
+      da.innerHTML = '';
+      if (histoActionsCache.length === 0) {
+        da.innerHTML = '<div style="font-size: 13px; color: var(--bubi-text-secondary);">Aucune</div>';
+      } else {
+        histoActionsCache.forEach(a => {
+          da.innerHTML += '<div class="action-item"><span>' + a.description + '</span><span class="action-type">' + a.type + '</span></div>';
+        });
+      }
+    }
+
+    // FEATURE 5: Day patterns
+    async function displayDayPatterns(todayVisits) {
+      if (todayVisits.length === 0) {
+        document.getElementById('day-patterns-widget').classList.add('hidden');
+        return;
+      }
+
+      document.getElementById('day-patterns-widget').classList.remove('hidden');
+
+      const kms = await dbGetAll('km');
+      const todayKms = kms.filter(k => k.date === new Date().toISOString().split('T')[0]);
+      const totalKm = todayKms.reduce((sum, k) => sum + k.km, 0);
+
+      // Calculate stats
+      let totalTime = 0;
+      let orderCount = 0;
+      const categoryStats = {};
+
+      todayVisits.forEach(v => {
+        if (v.startTime && v.endTime) {
+          totalTime += (new Date(v.endTime) - new Date(v.startTime)) / 60000;
+        }
+        if (v.feedback && v.feedback.order === 'Oui') {
+          orderCount++;
+        }
+        const cat = v.clientType || 'Autre';
+        if (!categoryStats[cat]) {
+          categoryStats[cat] = { count: 0, orders: 0 };
+        }
+        categoryStats[cat].count++;
+        if (v.feedback && v.feedback.order === 'Oui') {
+          categoryStats[cat].orders++;
+        }
+      });
+
+      const avgTimePerVisit = Math.round(totalTime / todayVisits.length);
+      const orderRate = Math.round((orderCount / todayVisits.length) * 100);
+
+      // Analyze feedback trends
+      const stockIssues = todayVisits.filter(v => v.feedback && v.feedback.stock === 'Faible').length;
+      const satisfactionIssues = todayVisits.filter(v => v.feedback && v.feedback.satisfaction === 'Problème').length;
+
+      let patternsHTML = '<div class="pattern-stat">' +
+                         '<span class="stat-label">Visites</span>' +
+                         '<span class="stat-value">' + todayVisits.length + ' complétées</span>' +
+                         '</div>';
+      patternsHTML += '<div class="pattern-stat">' +
+                      '<span class="stat-label">Commandes</span>' +
+                      '<span class="stat-value">' + orderCount + ' (' + orderRate + '%)</span>' +
+                      '</div>';
+      patternsHTML += '<div class="pattern-stat">' +
+                      '<span class="stat-label">Km</span>' +
+                      '<span class="stat-value">' + Math.round(totalKm) + ' km</span>' +
+                      '</div>';
+      patternsHTML += '<div class="pattern-stat">' +
+                      '<span class="stat-label">Temps moyen/visite</span>' +
+                      '<span class="stat-value">' + avgTimePerVisit + 'min</span>' +
+                      '</div>';
+
+      if (Object.keys(categoryStats).length > 0) {
+        patternsHTML += '<div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--bubi-border);"><div style="font-weight: 600; margin-bottom: 8px; color: var(--bubi-blueprint-strong);">Par catégorie:</div>';
+        Object.entries(categoryStats).forEach(([cat, stats]) => {
+          const catRate = Math.round((stats.orders / stats.count) * 100);
+          patternsHTML += '<div style="font-size: 12px; margin-bottom: 4px;">' + cat + ': ' + stats.count + ' visites, ' + catRate + '% commandes</div>';
+        });
+        patternsHTML += '</div>';
+      }
+
+      if (stockIssues > 0) {
+        patternsHTML += '<div class="alert-box">⚠️ ' + stockIssues + ' client(s) avec stock faible - vérifier approvisionnement</div>';
+      }
+
+      document.getElementById('patterns-content').innerHTML = patternsHTML;
+    }
+
+    function showHistoDetail(idx) {
+      const visit = histoVisitsCache[idx];
+      if (!visit) return;
+
+      const detail = document.getElementById('histo-detail');
+      const content = document.getElementById('histo-detail-content');
+
+      const start = visit.startTime ? new Date(visit.startTime).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) : '—';
+      const end = visit.endTime ? new Date(visit.endTime).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) : '—';
+      const duration = visit.startTime && visit.endTime ? Math.round((new Date(visit.endTime) - new Date(visit.startTime)) / 60000) : 0;
+      const date = new Date(visit.date).toLocaleDateString('fr-FR', { weekday: 'short', day: '2-digit', month: 'short' });
+
+      content.innerHTML = '';
+      content.innerHTML += '<div style="margin-bottom: 8px;"><strong>' + visit.client + '</strong></div>';
+      content.innerHTML += '<div style="margin-bottom: 4px; font-size: 13px;">Date: ' + date + '</div>';
+      content.innerHTML += '<div style="margin-bottom: 4px; font-size: 13px;">Horaires: ' + start + ' - ' + end + '</div>';
+      content.innerHTML += '<div style="margin-bottom: 8px; font-size: 13px;">Duree: ' + duration + ' minutes</div>';
+
+      // FEATURE 7: Display feedback tags
+      if (visit.feedback) {
+        const fb = visit.feedback;
+        let feedbackHTML = '<div style="margin-bottom: 8px;"><strong>Feedback:</strong></div>';
+        if (fb.stock) {
+          const tagClass = 'stock-' + fb.stock.toLowerCase().replace('-', '');
+          feedbackHTML += '<span class="tag ' + tagClass + '">Stock: ' + fb.stock + '</span>';
+        }
+        if (fb.satisfaction) {
+          const tagClass = 'satisfaction-' + fb.satisfaction.toLowerCase().replace('-', '');
+          feedbackHTML += '<span class="tag ' + tagClass + '">Satisfaction: ' + fb.satisfaction + '</span>';
+        }
+        if (fb.order) {
+          feedbackHTML += '<span class="tag" style="background: ' + (fb.order === 'Oui' ? 'var(--bubi-sage)' : '#F59E0B') + ';">Commande: ' + fb.order + '</span>';
+        }
+        if (fb.notes) {
+          feedbackHTML += '<div style="margin-top: 8px; font-size: 12px; color: var(--bubi-text-secondary);">Note: ' + fb.notes + '</div>';
+        }
+        content.innerHTML += feedbackHTML;
+      }
+
+      if (visit.actions && visit.actions.length > 0) {
+        content.innerHTML += '<div style="font-size: 13px; margin-bottom: 8px; margin-top: 8px;"><strong>Actions:</strong></div>';
+        visit.actions.forEach(a => {
+          content.innerHTML += '<div style="font-size: 12px; margin-bottom: 4px; padding: 4px; background: var(--bubi-sage); color: white; border-radius: 4px;">' + a.description + ' <span style="opacity: 0.8;">(' + a.type + ')</span></div>';
+        });
+      }
+
+      if (visit.notes) {
+        content.innerHTML += '<div style="font-size: 13px; color: var(--bubi-text-secondary); margin-top: 8px;">Note texte: ' + visit.notes + '</div>';
+      } else if (!visit.feedback && (!visit.actions || visit.actions.length === 0)) {
+        content.innerHTML += '<div style="font-size: 13px; color: var(--bubi-text-secondary);">Aucune note</div>';
+      }
+
+      detail.classList.remove('hidden');
+    }
+
+    function closeHistoDetail() {
+      document.getElementById('histo-detail').classList.add('hidden');
+    }
+
+    let calSelectedDate = new Date();
+
+    function updateCalDisplay() {
+      const d = calSelectedDate;
+      const dow = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'][d.getDay()];
+      const date = d.getDate() + ' ' + d.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
+      const week = getWeek(d);
+
+      document.getElementById('cal-date-display').textContent = dow + ' ' + date;
+      document.getElementById('cal-week-display').textContent = 'Semaine ' + week;
+
+      const clients = getClients(d);
+      const div = document.getElementById('cal-clients');
+      if (clients.length === 0) {
+        div.innerHTML = '<div class="cal-no-clients">Pas de clients ce jour</div>';
+      } else {
+        div.innerHTML = clients.map(c => {
+          const short = c.split(' - ')[1] || c;
+          return '<div class="cal-client-row" onclick="selectClientFromCal(\'' + c.replace(/'/g, "\\'") + '\')"><span class="cal-client-name">' + short + '</span><span>→</span></div>';
+        }).join('');
+      }
+    }
+
+    function calPrevDay() {
+      calSelectedDate.setDate(calSelectedDate.getDate() - 1);
+      let dow = calSelectedDate.getDay();
+      if (dow === 6) calSelectedDate.setDate(calSelectedDate.getDate() - 1);
+      if (dow === 0) calSelectedDate.setDate(calSelectedDate.getDate() - 2);
+      updateCalDisplay();
+    }
+
+    function calNextDay() {
+      calSelectedDate.setDate(calSelectedDate.getDate() + 1);
+      let dow = calSelectedDate.getDay();
+      if (dow === 6) calSelectedDate.setDate(calSelectedDate.getDate() + 2);
+      if (dow === 0) calSelectedDate.setDate(calSelectedDate.getDate() + 1);
+      updateCalDisplay();
+    }
+
+    function loadVisiteScreen() {
+      loadNote(visit.client);
+    }
+
+    function selectClientFromCal(client) {
+      visit.client = client;
+      document.getElementById('client-select').value = client;
+      loadVisiteScreen();
+      switchScreen('visite');
+    }
+
+    function loadCal() {
+      calSelectedDate = new Date();
+      updateCalDisplay();
+    }
+
+    async function exportDay() {
+      const today = new Date().toISOString().split('T')[0];
+      const visits = await dbGetAll('visits');
+      const kms = await dbGetAll('km');
+
+      const tv = visits.filter(v => v.date === today);
+      const tk = kms.filter(k => k.date === today);
+
+      const d = new Date();
+      const dateStr = d.toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+      let report = '=== RAPPORT ' + dateStr.toUpperCase() + ' ===\n\n';
+
+      if (tv.length > 0) {
+        report += 'VISITES (' + tv.length + ')\n';
+        report += '─'.repeat(40) + '\n';
+        tv.forEach((v, i) => {
+          const start = v.startTime ? new Date(v.startTime).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) : '—';
+          const end = v.endTime ? new Date(v.endTime).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) : '—';
+          const duration = v.startTime && v.endTime ? Math.round((new Date(v.endTime) - new Date(v.startTime)) / 60000) : 0;
+          report += (i+1) + '. ' + v.client + ' | ' + start + ' → ' + end + ' (' + duration + 'min)';
+          if (v.actions && v.actions.length > 0) {
+            const actionDescriptions = v.actions.map(a => a.description).join(', ');
+            report += '\n   Actions: ' + actionDescriptions;
+          }
+          if (v.notes) report += '\n   Note: ' + v.notes;
+          report += '\n';
+        });
+        report += '\n';
+      }
+
+      if (tk.length > 0) {
+        const totalKm = tk.reduce((sum, k) => sum + k.km, 0);
+        report += 'KILOMÉTRAGE\n';
+        report += '─'.repeat(40) + '\n';
+        report += 'Total: ' + totalKm + ' km\n';
+        tk.forEach(k => report += '• ' + k.km + ' km\n');
+        report += '\n';
+      }
+
+      report += '\n[Copié automatiquement - Collage prêt pour CRM]';
+
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(report).then(() => {
+          toast('Rapport copie');
+        }).catch(() => {
+          toast('Impossible de copier');
+        });
+      } else {
+        let actionCount = 0;
+        tv.forEach(v => { if (v.actions) actionCount += v.actions.length; });
+        toast('Rapport: ' + tv.length + ' visites, ' + actionCount + ' actions, ' + (tk.reduce((s,k) => s+k.km, 0) || 0) + ' km');
+      }
+    }
+
+    // FEATURE 8: Night Report
+    async function generateNightReport() {
+      const today = new Date().toISOString().split('T')[0];
+      const visits = await dbGetAll('visits');
+      const kms = await dbGetAll('km');
+
+      const todayVisits = visits.filter(v => v.date === today);
+      const todayKms = kms.filter(k => k.date === today);
+
+      if (todayVisits.length === 0) {
+        return null;
+      }
+
+      let totalTime = 0;
+      let orderCount = 0;
+      let actionCount = 0;
+      const stockIssues = [];
+
+      todayVisits.forEach(v => {
+        if (v.startTime && v.endTime) {
+          totalTime += (new Date(v.endTime) - new Date(v.startTime)) / 60000;
+        }
+        if (v.feedback && v.feedback.order === 'Oui') {
+          orderCount++;
+        }
+        if (v.actions) {
+          actionCount += v.actions.length;
+        }
+        if (v.feedback && v.feedback.stock === 'Faible') {
+          stockIssues.push(v.client);
+        }
+      });
+
+      const totalKm = todayKms.reduce((sum, k) => sum + k.km, 0);
+
+      let report = '<strong>Visites:</strong> ' + todayVisits.length + ' complétées<br>';
+      report += '<strong>Commandes:</strong> ' + orderCount + ' (' + Math.round((orderCount / todayVisits.length) * 100) + '%)<br>';
+      report += '<strong>Km:</strong> ' + Math.round(totalKm) + '<br>';
+      report += '<strong>Actions:</strong> ' + actionCount + ' créées<br>';
+      report += '<strong>Temps:</strong> ' + Math.round(totalTime) + 'min (' + Math.round(totalTime / todayVisits.length) + 'min/visite)<br>';
+
+      const score = orderCount / todayVisits.length > 0.6 ? '🟢 Bon' : '🟡 Moyen';
+      report += '<strong>Score:</strong> ' + score;
+
+      if (stockIssues.length > 0) {
+        report += '<br><strong>⚠️ Alertes:</strong><br>';
+        report += stockIssues.slice(0, 3).map(c => '• Stock faible: ' + c).join('<br>');
+      }
+
+      return report;
+    }
+
+    function shareNightReport() {
+      const text = document.getElementById('night-report-content').innerText;
+      if (navigator.share) {
+        navigator.share({
+          title: 'BubiMate Report',
+          text: text
+        });
+      } else if (navigator.clipboard) {
+        navigator.clipboard.writeText(text).then(() => {
+          toast('Copié au clipboard');
+        });
+      }
+    }
+
+    function exportNightReport() {
+      const text = document.getElementById('night-report-content').innerText;
+      const blob = new Blob([text], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'rapport-' + new Date().toISOString().split('T')[0] + '.txt';
+      link.click();
+      URL.revokeObjectURL(url);
+    }
+
+    // FEATURE 10: Smart Close Checklist
+    async function showSmartCloseModal() {
+      const today = new Date().toISOString().split('T')[0];
+      const visits = await dbGetAll('visits');
+      const todayVisits = visits.filter(v => v.date === today);
+
+      const planClients = getClients(new Date());
+      const completedCount = planClients.filter(c => todayVisits.some(v => v.client === c)).length;
+      const feedbackCount = todayVisits.filter(v => v.feedback).length;
+      const actionCount = todayVisits.reduce((sum, v) => sum + (v.actions ? v.actions.length : 0), 0);
+      const withFeedback = todayVisits.filter(v => !v.feedback).length;
+
+      // Build checklist
+      let checklist = '<div class="checklist-item"><input type="checkbox" ' + (completedCount === planClients.length ? 'checked' : '') + ' disabled><span>Toutes visites fermées? (' + completedCount + '/' + planClients.length + ')</span></div>';
+      checklist += '<div class="checklist-item"><input type="checkbox" ' + (withFeedback === 0 ? 'checked' : '') + ' disabled><span>Feedback noté? (' + feedbackCount + '/' + todayVisits.length + ')</span></div>';
+      checklist += '<div class="checklist-item"><input type="checkbox" disabled><span>Actions vérifiées? (' + actionCount + ' créées)</span></div>';
+
+      const kms = await dbGetAll('km');
+      const todayKms = kms.filter(k => k.date === today);
+      const totalKm = todayKms.reduce((sum, k) => sum + k.km, 0);
+      checklist += '<div class="checklist-item"><input type="checkbox" ' + (totalKm > 0 ? 'checked' : '') + ' disabled><span>Km enregistré? (' + Math.round(totalKm) + ' km)</span></div>';
+
+      document.getElementById('checklist-content').innerHTML = checklist;
+
+      // Show alerts if needed
+      let alerts = '';
+      if (withFeedback > 0) {
+        alerts += '<div class="alert-box">⚠️ ' + withFeedback + ' visite(s) sans feedback</div>';
+      }
+      if (completedCount < planClients.length) {
+        const missing = planClients.filter(c => !todayVisits.some(v => v.client === c)).slice(0, 3);
+        alerts += '<div class="alert-box">📍 ' + (planClients.length - completedCount) + ' client(s) non visité(s)</div>';
+      }
+
+      if (alerts) {
+        document.getElementById('alerts-content').innerHTML = alerts;
+        document.getElementById('alerts-content').classList.remove('hidden');
+      } else {
+        document.getElementById('alerts-content').classList.add('hidden');
+      }
+
+      // Show tomorrow preview
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      const tomorrowClients = getClients(tomorrow);
+      if (tomorrowClients.length > 0) {
+        let preview = tomorrowClients.slice(0, 5).map(c => '• ' + (c.split(' - ')[1] || c)).join('<br>');
+        if (tomorrowClients.length > 5) {
+          preview += '<br>... et ' + (tomorrowClients.length - 5) + ' de plus';
+        }
+        document.getElementById('tomorrow-content').innerHTML = preview;
+        document.getElementById('tomorrow-preview').classList.remove('hidden');
+      } else {
+        document.getElementById('tomorrow-preview').classList.add('hidden');
+      }
+
+      document.getElementById('close-checklist-backdrop').classList.add('show');
+    }
+
+    function closeSmartCloseModal() {
+      document.getElementById('close-checklist-backdrop').classList.remove('show');
+    }
+
+    // FEATURE 6: Route Suggestion
+    async function suggestOptimizedRoute() {
+      const today = new Date().toISOString().split('T')[0];
+      const visits = await dbGetAll('visits');
+      const todayVisits = visits.filter(v => v.date === today);
+      const planClients = getClients(new Date());
+
+      if (todayVisits.length >= planClients.length || planClients.length < 2) {
+        return;
+      }
+
+      const remaining = planClients.filter(c => !todayVisits.some(v => v.client === c));
+      if (remaining.length < 2) {
+        return;
+      }
+
+      // Simple route optimization (grouped by zone)
+      const zones = {};
+      remaining.forEach(c => {
+        const zone = c.split(' - ')[0] || 'Autre';
+        if (!zones[zone]) zones[zone] = [];
+        zones[zone].push(c);
+      });
+
+      let suggestion = '<strong>Clients à visiter:</strong><br>';
+      let idx = 1;
+      Object.entries(zones).forEach(([zone, clients]) => {
+        clients.forEach(c => {
+          const short = c.split(' - ')[1] || c;
+          suggestion += idx + '. ' + short + ' [' + zone + ']<br>';
+          idx++;
+        });
+      });
+
+      const estimatedKmSaved = Math.floor(remaining.length * 2);
+      suggestion += '<br><strong>Estimation:</strong> Économiser ~' + estimatedKmSaved + ' km';
+
+      document.getElementById('route-content').innerHTML = suggestion;
+      document.getElementById('route-suggestion-backdrop').classList.add('show');
+    }
+
+    function applyOptimizedRoute() {
+      toast('Parcours proposé');
+      closeRouteSuggestion();
+    }
+
+    function closeRouteSuggestion() {
+      document.getElementById('route-suggestion-backdrop').classList.remove('show');
+    }
+
+    // Detect end of day (18:00) or app close to show smart close
+    window.addEventListener('beforeunload', () => {
+      const hour = new Date().getHours();
+      if (hour >= 18) {
+        showSmartCloseModal();
+      }
+    });
+
+    async function main() {
+      await initDB();
+      loadClients();
+      loadStats();
+
+      // Show night report on accueil if available
+      const report = await generateNightReport();
+      if (report) {
+        document.getElementById('night-report-widget').classList.remove('hidden');
+        document.getElementById('night-report-content').innerHTML = report;
+      }
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', main);
+    } else {
+      main();
+    }
+
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('./sw.js').catch(() => {});
+    }
+  </script>
+</body>
+</html>
